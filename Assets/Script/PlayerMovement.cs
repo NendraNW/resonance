@@ -12,7 +12,9 @@ public class PlayerController : MonoBehaviour
     public LayerMask groundLayer; // Assign "Ground" layer in Inspector
 
     private bool isGrounded;
-    private float moveInput;
+    private float moveInputX;
+    private float moveInputZ;
+    private int facingDirection = 1; // 1 = Right, -1 = Left
 
     void Start()
     {
@@ -33,16 +35,29 @@ public class PlayerController : MonoBehaviour
 
     void HandleMovement()
     {
-        // Get input for movement (A = -1, D = 1)
-        moveInput = Input.GetAxisRaw("Horizontal");
+        // Get input for movement
+        moveInputX = Input.GetAxisRaw("Horizontal"); // A (-1) | D (1)
+        moveInputZ = Input.GetAxisRaw("Vertical");   // W (1) | S (-1)
 
-        // Move the player (using Rigidbody for smooth movement)
-        rb.linearVelocity = new Vector3(moveInput * moveSpeed, rb.linearVelocity.y, 0);
+        // Move the player (A & D move left/right, W & S move forward/back)
+        rb.linearVelocity = new Vector3(moveInputX * moveSpeed, rb.linearVelocity.y, moveInputZ * moveSpeed);
 
-        // Flip sprite based on movement direction
-        if (moveInput != 0)
+        // Separate Left/Right flipping from Forward/Backward scaling
+        if (moveInputX != 0)
         {
-            spriteTransform.localScale = new Vector3(moveInput < 0 ? -1 : 1, 1, 1);
+            facingDirection = (moveInputX > 0) ? 1 : -1; // Flip for left/right movement
+        }
+
+        // Flip sprite based on left/right movement (A & D)
+        spriteTransform.localScale = new Vector3(facingDirection, Mathf.Abs(spriteTransform.localScale.y), Mathf.Abs(spriteTransform.localScale.z));
+
+        // Scale sprite for forward/backward movement (W & S)
+        float scaleFactor = (moveInputZ != 0) ? 1.2f : 1.0f; // Slightly bigger when moving forward
+        spriteTransform.localScale = new Vector3(spriteTransform.localScale.x, scaleFactor, scaleFactor);
+
+        // Set running animation when moving in any direction
+        if (moveInputX != 0 || moveInputZ != 0)
+        {
             animator.SetBool("IsRunningBool", true);
         }
         else
@@ -57,7 +72,7 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
-            rb.linearVelocity = new Vector3(rb.linearVelocity.x, jumpForce, 0);
+            rb.linearVelocity = new Vector3(rb.linearVelocity.x, jumpForce, rb.linearVelocity.z);
             animator.SetTrigger("JumpTrigger");
         }
     }
