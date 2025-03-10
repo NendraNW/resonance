@@ -61,6 +61,7 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.0.37f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Script\NinjaMovement.cs" />
     <Compile Include="Assets\Script\PlayerMovement.cs" />
   </ItemGroup>
   <ItemGroup>
